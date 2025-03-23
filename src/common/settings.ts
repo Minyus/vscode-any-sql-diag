@@ -203,35 +203,35 @@ export function logLegacySettings(): void {
         try {
             const legacyConfig = getConfiguration('python', workspace.uri);
 
-            const legacyPylintEnabled = legacyConfig.get<boolean>('linting.pylintEnabled', false);
-            if (legacyPylintEnabled) {
-                traceWarn(`"python.linting.pylintEnabled" is deprecated. You can remove that setting.`);
+            const legacyAnysqldiagEnabled = legacyConfig.get<boolean>('linting.anysqldiagEnabled', false);
+            if (legacyAnysqldiagEnabled) {
+                traceWarn(`"python.linting.anysqldiagEnabled" is deprecated. You can remove that setting.`);
                 traceWarn(
-                    'The pylint extension is always enabled. However, you can disable it per workspace using the extensions view.',
+                    'The anysqldiag extension is always enabled. However, you can disable it per workspace using the extensions view.',
                 );
                 traceWarn('You can exclude files and folders using the `python.linting.ignorePatterns` setting.');
                 traceWarn(
-                    `"python.linting.pylintEnabled" value for workspace ${workspace.uri.fsPath}: ${legacyPylintEnabled}`,
+                    `"python.linting.anysqldiagEnabled" value for workspace ${workspace.uri.fsPath}: ${legacyAnysqldiagEnabled}`,
                 );
             }
 
             const legacyCwd = legacyConfig.get<string>('linting.cwd');
             if (legacyCwd) {
-                traceWarn(`"python.linting.cwd" is deprecated. Use "pylint.cwd" instead.`);
+                traceWarn(`"python.linting.cwd" is deprecated. Use "anysqldiag.cwd" instead.`);
                 traceWarn(`"python.linting.cwd" value for workspace ${workspace.uri.fsPath}: ${legacyCwd}`);
             }
 
-            const legacyArgs = legacyConfig.get<string[]>('linting.pylintArgs', []);
+            const legacyArgs = legacyConfig.get<string[]>('linting.anysqldiagArgs', []);
             if (legacyArgs.length > 0) {
-                traceWarn(`"python.linting.pylintArgs" is deprecated. Use "pylint.args" instead.`);
-                traceWarn(`"python.linting.pylintArgs" value for workspace ${workspace.uri.fsPath}:`);
+                traceWarn(`"python.linting.anysqldiagArgs" is deprecated. Use "anysqldiag.args" instead.`);
+                traceWarn(`"python.linting.anysqldiagArgs" value for workspace ${workspace.uri.fsPath}:`);
                 traceWarn(`\n${JSON.stringify(legacyArgs, null, 4)}`);
             }
 
-            const legacyPath = legacyConfig.get<string>('linting.pylintPath', '');
-            if (legacyPath.length > 0 && legacyPath !== 'pylint') {
-                traceWarn(`"python.linting.pylintPath" is deprecated. Use "pylint.path" instead.`);
-                traceWarn(`"python.linting.pylintPath" value for workspace ${workspace.uri.fsPath}:`);
+            const legacyPath = legacyConfig.get<string>('linting.anysqldiagPath', '');
+            if (legacyPath.length > 0 && legacyPath !== 'anysqldiag') {
+                traceWarn(`"python.linting.anysqldiagPath" is deprecated. Use "anysqldiag.path" instead.`);
+                traceWarn(`"python.linting.anysqldiagPath" value for workspace ${workspace.uri.fsPath}:`);
                 traceWarn(`\n${JSON.stringify(legacyPath, null, 4)}`);
             }
         } catch (err) {

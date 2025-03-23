@@ -19,7 +19,7 @@ TEST_FILE_URI = utils.as_uri(str(TEST_FILE_PATH))
 TEST_FILE2_URI = utils.as_uri(str(TEST_FILE2_PATH))
 LINTER = utils.get_server_info_defaults()
 TIMEOUT = 10  # 10 seconds
-DOCUMENTATION_HOME = "https://pylint.readthedocs.io/en/latest/user_guide/messages"
+DOCUMENTATION_HOME = "https://anysqldiag.readthedocs.io/en/latest/user_guide/messages"
 
 
 def test_publish_diagnostics_on_open():
@@ -255,7 +255,7 @@ def test_publish_diagnostics_on_change():
     contents = TEST_FILE2_PATH.read_text(encoding="utf-8")
 
     actual = []
-    os.environ["VSCODE_PYLINT_LINT_ON_CHANGE"] = "1"
+    os.environ["VSCODE_ANYSQLDIAG_LINT_ON_CHANGE"] = "1"
     with session.LspSession() as ls_session:
         ls_session.initialize()
 
@@ -331,7 +331,7 @@ def test_publish_diagnostics_on_change():
                     "codeDescription": {
                         "href": f"{DOCUMENTATION_HOME}/convention/missing-final-newline.html"
                     },
-                    "source": "Pylint",
+                    "source": "Anysqldiag",
                 },
                 {
                     "range": {
@@ -347,7 +347,7 @@ def test_publish_diagnostics_on_change():
                     "codeDescription": {
                         "href": f"{DOCUMENTATION_HOME}/error/undefined-variable.html"
                     },
-                    "source": "Pylint",
+                    "source": "Anysqldiag",
                 },
             ],
         }

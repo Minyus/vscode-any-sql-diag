@@ -24,7 +24,7 @@ if os.getenv("USE_DEBUGPY", None) in ["True", "TRUE", "1", "T"]:
 
         update_sys_path(debugger_path)
 
-        # pylint: disable=wrong-import-position,import-error
+        # anysqldiag: disable=wrong-import-position,import-error
         import debugpy
 
         # 5678 is the default port, If you need to change it update it here

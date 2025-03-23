@@ -1,32 +1,35 @@
 {
-    "name": "pylint",
-    "displayName": "Pylint",
+    "name": "anysqldiag",
+    "displayName": "Anysqldiag",
     "description": "%extension.description%",
     "version": "2025.3.0",
     "preview": true,
     "serverInfo": {
-        "name": "Pylint",
-        "module": "pylint"
+        "name": "Anysqldiag",
+        "module": "anysqldiag"
     },
-    "publisher": "ms-python",
+    "publisher": "Minyus",
     "license": "MIT",
-    "homepage": "https://github.com/Microsoft/vscode-pylint",
+    "homepage": "https://github.com/Minyus/vscode-any-sql-diag",
     "repository": {
         "type": "git",
-        "url": "https://github.com/microsoft/vscode-pylint.git"
+        "url": "https://github.com/Minyus/vscode-any-sql-diag.git"
     },
     "bugs": {
-        "url": "https://github.com/Microsoft/vscode-pylint/issues"
+        "url": "https://github.com/Minyus/vscode-any-sql-diag/issues"
     },
     "icon": "icon.png",
     "galleryBanner": {
-        "color": "#1e415e",
+        "color": "#6fff00",
         "theme": "dark"
     },
     "keywords": [
-        "python",
-        "linting",
-        "pylint"
+        "sql",
+        "sqlglot",
+        "anysqldiag",
+        "diagnosis",
+        "trino",
+        "spark"
     ],
     "engines": {
         "vscode": "^1.74.0"
@@ -41,13 +44,13 @@
     "capabilities": {
         "virtualWorkspaces": {
             "supported": false,
-            "description": "Virtual Workspaces are not supported with pylint."
+            "description": "Virtual Workspaces are not supported with anysqldiag."
         }
     },
     "activationEvents": [
-        "onLanguage:python",
-        "workspaceContains:.pylintrc",
-        "workspaceContains:*.py"
+        "onLanguage:sql",
+        "workspaceContains:.anysqldiagrc",
+        "workspaceContains:*.sql"
     ],
     "main": "./dist/extension.js",
     "l10n": "./l10n",
@@ -62,20 +65,20 @@
         "lint": "eslint src --ext ts",
         "format-check": "prettier --check 'src/**/*.ts' 'build/**/*.yml' '.github/**/*.yml'",
         "tests": "node ./out/test/ts_tests/runTest.js",
-        "vsce-package": "vsce package -o pylint.vsix"
+        "vsce-package": "vsce package -o anysqldiag.vsix"
     },
     "contributes": {
         "languages": [
             {
                 "filenames": [
-                    ".pylintrc"
+                    ".anysqldiagrc"
                 ],
                 "id": "ini"
             }
         ],
         "configuration": {
             "properties": {
-                "pylint.args": {
+                "anysqldiag.args": {
                     "default": [],
                     "markdownDescription": "%settings.args.description%",
                     "items": {
@@ -84,7 +87,7 @@
                     "scope": "resource",
                     "type": "array"
                 },
-                "pylint.cwd": {
+                "anysqldiag.cwd": {
                     "default": "${workspaceFolder}",
                     "markdownDescription": "%settings.cwd.description%",
                     "scope": "resource",
@@ -94,13 +97,13 @@
                         "${fileDirname}"
                     ]
                 },
-                "pylint.enabled": {
+                "anysqldiag.enabled": {
                     "default": true,
                     "markdownDescription": "%settings.enabled.description%",
                     "scope": "resource",
                     "type": "boolean"
                 },
-                "pylint.ignorePatterns": {
+                "anysqldiag.ignorePatterns": {
                     "default": [],
                     "markdownDescription": "%settings.ignorePatterns.description%",
                     "items": {
@@ -111,12 +114,12 @@
                     "uniqueItems": true,
                     "examples": [
                         [
-                            "**/site-packages/**/*.py",
-                            ".vscode/*.py"
+                            "**/site-packages/**/*",
+                            ".vscode/*"
                         ]
                     ]
                 },
-                "pylint.importStrategy": {
+                "anysqldiag.importStrategy": {
                     "default": "useBundled",
                     "markdownDescription": "%settings.importStrategy.description%",
                     "enum": [
@@ -130,7 +133,7 @@
                     "scope": "resource",
                     "type": "string"
                 },
-                "pylint.interpreter": {
+                "anysqldiag.interpreter": {
                     "default": [],
                     "markdownDescription": "%settings.interpreter.description%",
                     "scope": "resource",
@@ -139,7 +142,7 @@
                     },
                     "type": "array"
                 },
-                "pylint.lintOnChange": {
+                "anysqldiag.lintOnChange": {
                     "default": false,
                     "markdownDescription": "%settings.lintOnChange.description%",
                     "scope": "machine",
@@ -148,7 +151,7 @@
                         "experimental"
                     ]
                 },
-                "pylint.path": {
+                "anysqldiag.path": {
                     "default": [],
                     "markdownDescription": "%settings.path.description%",
                     "scope": "resource",
@@ -158,16 +161,16 @@
                     "type": "array",
                     "examples": [
                         [
-                            "~/global_env/pylint"
+                            "~/global_env/anysqldiag"
                         ],
                         [
                             "~/.env/python",
                             "-m",
-                            "pylint"
+                            "anysqldiag"
                         ]
                     ]
                 },
-                "pylint.severity": {
+                "anysqldiag.severity": {
                     "default": {
                         "convention": "Information",
                         "error": "Error",
@@ -189,7 +192,7 @@
                     "scope": "resource",
                     "type": "object"
                 },
-                "pylint.showNotifications": {
+                "anysqldiag.showNotifications": {
                     "default": "off",
                     "markdownDescription": "%settings.showNotifications.description%",
                     "enum": [
@@ -212,8 +215,8 @@
         "commands": [
             {
                 "title": "%command.restartServer%",
-                "category": "Pylint",
-                "command": "pylint.restart"
+                "category": "Anysqldiag",
+                "command": "anysqldiag.restart"
             }
         ]
     },

@@ -104,7 +104,7 @@ def is_match(patterns: List[str], file_path: str) -> bool:
     return any(fnmatch.fnmatch(file_path, pattern) for pattern in patterns)
 
 
-# pylint: disable-next=too-few-public-methods
+# anysqldiag: disable-next=too-few-public-methods
 class RunResult:
     """Object to hold result from running tool."""
 

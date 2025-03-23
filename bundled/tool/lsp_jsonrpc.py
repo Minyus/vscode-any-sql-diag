@@ -26,7 +26,7 @@ def to_str(text) -> str:
 class StreamClosedException(Exception):
     """JSON RPC stream is closed."""
 
-    pass  # pylint: disable=unnecessary-pass
+    pass  # anysqldiag: disable=unnecessary-pass
 
 
 class JsonWriter:
@@ -102,11 +102,11 @@ class JsonRpc:
         """Closes the underlying streams."""
         try:
             self._reader.close()
-        except:  # pylint: disable=bare-except
+        except:  # anysqldiag: disable=bare-except
             pass
         try:
             self._writer.close()
-        except:  # pylint: disable=bare-except
+        except:  # anysqldiag: disable=bare-except
             pass
 
     def send_data(self, data):
@@ -138,7 +138,7 @@ class ProcessManager:
         for i in self._rpc.values():
             try:
                 i.send_data({"id": str(uuid.uuid4()), "method": "exit"})
-            except:  # pylint: disable=bare-except
+            except:  # anysqldiag: disable=bare-except
                 pass
         self._thread_pool.shutdown(wait=False)
 
@@ -154,7 +154,7 @@ class ProcessManager:
         if env is not None:
             _env.update(env)
 
-        # pylint: disable=consider-using-with
+        # anysqldiag: disable=consider-using-with
         proc = subprocess.Popen(
             args,
             cwd=cwd,
@@ -172,7 +172,7 @@ class ProcessManager:
                     del self._processes[workspace]
                     rpc = self._rpc.pop(workspace)
                     rpc.close()
-                except:  # pylint: disable=bare-except
+                except:  # anysqldiag: disable=bare-except
                     pass
 
         self._thread_pool.submit(_monitor_process)
@@ -213,7 +213,7 @@ def get_or_start_json_rpc(
     return res
 
 
-# pylint: disable=too-few-public-methods
+# anysqldiag: disable=too-few-public-methods
 class RpcRunResult:
     """Object to hold result from running tool over RPC."""
 
@@ -223,7 +223,7 @@ class RpcRunResult:
         self.exception = exception
 
 
-# pylint: disable=too-many-arguments
+# anysqldiag: disable=too-many-arguments
 def run_over_json_rpc(
     workspace: str,
     interpreter: Sequence[str],

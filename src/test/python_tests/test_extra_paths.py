@@ -36,7 +36,7 @@ class CallbackObject:
 
 
 def test_extra_paths():
-    """Test linting using pylint with extraPaths set."""
+    """Test linting using anysqldiag with extraPaths set."""
 
     default_init = defaults.vscode_initialize_defaults()
     default_init["initializationOptions"]["settings"][0]["extraPaths"] = [

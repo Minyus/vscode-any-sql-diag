@@ -33,10 +33,10 @@ class CallbackObject:
 
 
 def test_path():
-    """Test linting using pylint bin path set."""
+    """Test linting using anysqldiag bin path set."""
 
     default_init = defaults.vscode_initialize_defaults()
-    default_init["initializationOptions"]["settings"][0]["path"] = ["pylint"]
+    default_init["initializationOptions"]["settings"][0]["path"] = ["anysqldiag"]
 
     argv_callback_object = CallbackObject()
     contents = TEST_FILE_PATH.read_text(encoding="utf-8")

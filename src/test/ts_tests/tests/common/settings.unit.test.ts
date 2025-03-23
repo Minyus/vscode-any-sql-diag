@@ -40,7 +40,7 @@ suite('Settings Tests', () => {
             configMock = TypeMoq.Mock.ofType<WorkspaceConfiguration>();
             pythonConfigMock = TypeMoq.Mock.ofType<WorkspaceConfiguration>();
             getConfigurationStub.callsFake((namespace: string, uri: Uri) => {
-                if (namespace.startsWith('pylint')) {
+                if (namespace.startsWith('anysqldiag')) {
                     return configMock.object;
                 }
                 return pythonConfigMock.object;
@@ -85,19 +85,19 @@ suite('Settings Tests', () => {
                 .verifiable(TypeMoq.Times.atLeastOnce());
 
             pythonConfigMock
-                .setup((c) => c.get('linting.pylintArgs', []))
+                .setup((c) => c.get('linting.anysqldiagArgs', []))
                 .returns(() => [])
                 .verifiable(TypeMoq.Times.never());
             pythonConfigMock
-                .setup((c) => c.get('linting.pylintPath', ''))
-                .returns(() => 'pylint')
+                .setup((c) => c.get('linting.anysqldiagPath', ''))
+                .returns(() => 'anysqldiag')
                 .verifiable(TypeMoq.Times.never());
             pythonConfigMock
                 .setup((c) => c.get('analysis.extraPaths', []))
                 .returns(() => [])
                 .verifiable(TypeMoq.Times.atLeastOnce());
 
-            const settings: ISettings = await getWorkspaceSettings('pylint', workspace1);
+            const settings: ISettings = await getWorkspaceSettings('anysqldiag', workspace1);
 
             assert.deepStrictEqual(settings.cwd, workspace1.uri.fsPath);
             assert.deepStrictEqual(settings.args, []);
@@ -126,10 +126,10 @@ suite('Settings Tests', () => {
             configMock
                 .setup((c) => c.get<string[]>('path', []))
                 .returns(() => [
-                    '${userHome}/bin/pylint',
-                    '${workspaceFolder}/bin/pylint',
-                    '${workspaceFolder:workspace1}/bin/pylint',
-                    '${cwd}/bin/pylint',
+                    '${userHome}/bin/anysqldiag',
+                    '${workspaceFolder}/bin/anysqldiag',
+                    '${workspaceFolder:workspace1}/bin/anysqldiag',
+                    '${cwd}/bin/anysqldiag',
                     '${interpreter}',
                 ])
                 .verifiable(TypeMoq.Times.atLeastOnce());
@@ -160,12 +160,12 @@ suite('Settings Tests', () => {
                 .verifiable(TypeMoq.Times.atLeastOnce());
 
             pythonConfigMock
-                .setup((c) => c.get('linting.pylintArgs', []))
+                .setup((c) => c.get('linting.anysqldiagArgs', []))
                 .returns(() => [])
                 .verifiable(TypeMoq.Times.never());
             pythonConfigMock
-                .setup((c) => c.get('linting.pylintPath', ''))
-                .returns(() => 'pylint')
+                .setup((c) => c.get('linting.anysqldiagPath', ''))
+                .returns(() => 'anysqldiag')
                 .verifiable(TypeMoq.Times.never());
             pythonConfigMock
                 .setup((c) => c.get<string[]>('analysis.extraPaths', []))
@@ -181,7 +181,7 @@ suite('Settings Tests', () => {
                 .returns(() => '${userHome}/bin')
                 .verifiable(TypeMoq.Times.never());
 
-            const settings: ISettings = await getWorkspaceSettings('pylint', workspace1, true);
+            const settings: ISettings = await getWorkspaceSettings('anysqldiag', workspace1, true);
 
             assert.deepStrictEqual(settings.cwd, '${fileDirname}');
             assert.deepStrictEqual(settings.args, [
@@ -191,10 +191,10 @@ suite('Settings Tests', () => {
                 process.cwd(),
             ]);
             assert.deepStrictEqual(settings.path, [
-                `${process.env.HOME || process.env.USERPROFILE}/bin/pylint`,
-                `${workspace1.uri.fsPath}/bin/pylint`,
-                `${workspace1.uri.fsPath}/bin/pylint`,
-                `${process.cwd()}/bin/pylint`,
+                `${process.env.HOME || process.env.USERPROFILE}/bin/anysqldiag`,
+                `${workspace1.uri.fsPath}/bin/anysqldiag`,
+                `${workspace1.uri.fsPath}/bin/anysqldiag`,
+                `${process.cwd()}/bin/anysqldiag`,
                 `${process.env.HOME || process.env.USERPROFILE}/bin/python`,
                 `${workspace1.uri.fsPath}/bin/python`,
                 `${workspace1.uri.fsPath}/bin/python`,
@@ -248,12 +248,12 @@ suite('Settings Tests', () => {
                 .verifiable(TypeMoq.Times.atLeastOnce());
 
             pythonConfigMock
-                .setup((c) => c.get<string[]>('linting.pylintArgs', []))
+                .setup((c) => c.get<string[]>('linting.anysqldiagArgs', []))
                 .returns(() => ['${userHome}', '${workspaceFolder}', '${workspaceFolder:workspace1}', '${cwd}'])
                 .verifiable(TypeMoq.Times.never());
             pythonConfigMock
-                .setup((c) => c.get('linting.pylintPath', ''))
-                .returns(() => '${userHome}/bin/pylint')
+                .setup((c) => c.get('linting.anysqldiagPath', ''))
+                .returns(() => '${userHome}/bin/anysqldiag')
                 .verifiable(TypeMoq.Times.never());
             pythonConfigMock
                 .setup((c) => c.get<string[]>('analysis.extraPaths', []))
@@ -272,7 +272,7 @@ suite('Settings Tests', () => {
                 .returns(() => '${userHome}/bin2')
                 .verifiable(TypeMoq.Times.never());
 
-            const settings: ISettings = await getWorkspaceSettings('pylint', workspace1);
+            const settings: ISettings = await getWorkspaceSettings('anysqldiag', workspace1);
 
             assert.deepStrictEqual(settings.cwd, `${process.env.HOME || process.env.USERPROFILE}/bin`);
             // Legacy args should not be read anymore. They are deprecated.
@@ -304,7 +304,7 @@ suite('Settings Tests', () => {
                     .setup((c) => c.get<boolean>('lintOnChange', false))
                     .returns(() => value)
                     .verifiable(TypeMoq.Times.atLeastOnce());
-                assert.deepStrictEqual(isLintOnChangeEnabled('pylint'), value);
+                assert.deepStrictEqual(isLintOnChangeEnabled('anysqldiag'), value);
             });
         });
     });

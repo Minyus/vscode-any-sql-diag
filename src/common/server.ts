@@ -48,7 +48,7 @@ async function createServer(
     newEnv.PYTHONUTF8 = '1';
 
     if (isLintOnChangeEnabled(serverId)) {
-        newEnv.VSCODE_PYLINT_LINT_ON_CHANGE = '1';
+        newEnv.VSCODE_ANYSQLDIAG_LINT_ON_CHANGE = '1';
     }
 
     const args =

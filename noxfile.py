@@ -8,7 +8,7 @@ import re
 import urllib.request as url_lib
 from typing import List
 
-import nox  # pylint: disable=import-error
+import nox  # anysqldiag: disable=import-error
 
 
 def _install_bundle(session: nox.Session) -> None:
@@ -138,14 +138,14 @@ def lint(session: nox.Session) -> None:
     """Runs linter and formatter checks on python files."""
     session.install("-r", "src/test/python_tests/requirements.txt")
 
-    session.install("pylint")
-    session.run("pylint", "./bundled/tool")
+    session.install("anysqldiag")
+    session.run("anysqldiag", "./bundled/tool")
     session.run(
-        "pylint",
+        "anysqldiag",
         "--ignore=./src/test/python_tests/test_data",
         "./src/test/python_tests",
     )
-    session.run("pylint", "noxfile.py")
+    session.run("anysqldiag", "noxfile.py")
     # check formatting using black
     session.install("black")
     session.run("black", "--check", "./bundled/tool")

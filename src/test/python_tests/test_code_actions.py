@@ -37,7 +37,7 @@ def _expected_organize_imports_command():
     [
         (
             "C0301:line-too-long",
-            # pylint: disable=line-too-long
+            # anysqldiag: disable=line-too-long
             "FRUIT = ['apricot', 'blackcurrant', 'cantaloupe', 'dragon fruit', 'elderberry', 'fig', 'grapefruit', 'honeydew melon', 'jackfruit', 'kiwi', 'lemon', 'mango', 'nectarine', 'orange', 'papaya', 'quince', 'raspberry', 'strawberry', 'tangerine', 'watermelon']\n",
             _expected_format_command(),
         ),
@@ -68,12 +68,12 @@ def _expected_organize_imports_command():
         ),
         (
             "C0411:wrong-import-order",
-            "import os\nfrom . import utils\nimport pylint\nimport sys\n",
+            "import os\nfrom . import utils\nimport anysqldiag\nimport sys\n",
             _expected_organize_imports_command(),
         ),
         (
             "C0412:ungrouped-imports",
-            # pylint: disable=line-too-long
+            # anysqldiag: disable=line-too-long
             "import logging\nimport os\nimport sys\nimport logging.config\nfrom logging.handlers import WatchedFileHandler\n",
             _expected_organize_imports_command(),
         ),

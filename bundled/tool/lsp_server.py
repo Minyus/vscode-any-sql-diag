@@ -59,7 +59,7 @@ update_environ_path()
 # **********************************************************
 # Imports needed for the language server goes below this.
 # **********************************************************
-# pylint: disable=wrong-import-position,import-error
+# anysqldiag: disable=wrong-import-position,import-error
 import lsp_jsonrpc as jsonrpc
 import lsp_utils as utils
 from lsprotocol import types as lsp
@@ -71,29 +71,27 @@ RUNNER = pathlib.Path(__file__).parent / "runner.py"
 
 MAX_WORKERS = 5
 LSP_SERVER = server.LanguageServer(
-    name="pylint-server", version="v0.1.0", max_workers=MAX_WORKERS
+    name="anysqldiag-server", version="v0.1.0", max_workers=MAX_WORKERS
 )
 
 
 # **********************************************************
 # Tool specific code goes below this.
 # **********************************************************
-TOOL_MODULE = "pylint"
-TOOL_DISPLAY = "Pylint"
-DOCUMENTATION_HOME = "https://pylint.readthedocs.io/en/latest/user_guide/messages"
+TOOL_MODULE = "anysqldiag"
+TOOL_DISPLAY = "AnySqlDiag"
+DOCUMENTATION_HOME = "https://github.com/Minyus/vscode-any-sql-diag"
 
-# Default arguments always passed to pylint.
-TOOL_ARGS = ["--reports=n", "--output-format=json"]
+# Default arguments always passed to anysqldiag.
+TOOL_ARGS = []
 
-# Minimum version of pylint supported.
-MIN_VERSION = "2.12.2"
 
 # **********************************************************
 # Linting features start here
 # **********************************************************
 
 
-# Captures version of `pylint` in various workspaces.
+# Captures version of `anysqldiag` in various workspaces.
 VERSION_TABLE: Dict[str, (int, int, int)] = {}
 
 
@@ -121,7 +119,7 @@ def did_close(params: lsp.DidCloseTextDocumentParams) -> None:
     LSP_SERVER.publish_diagnostics(document.uri, [])
 
 
-if os.getenv("VSCODE_PYLINT_LINT_ON_CHANGE"):
+if os.getenv("VSCODE_ANYSQLDIAG_LINT_ON_CHANGE"):
 
     @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_CHANGE)
     def did_change(params: lsp.DidChangeTextDocumentParams) -> None:
@@ -135,20 +133,14 @@ def _linting_helper(document: workspace.Document) -> list[lsp.Diagnostic]:
     try:
         extra_args = []
 
-        code_workspace = _get_settings_by_document(document)["workspaceFS"]
-        if VERSION_TABLE.get(code_workspace, None):
-            major, minor, _ = VERSION_TABLE[code_workspace]
-            if (major, minor) >= (2, 16):
-                extra_args += ["--clear-cache-post-run=y"]
-
-        result = _run_tool_on_document(document, use_stdin=True, extra_args=extra_args)
+        result = _run_tool_on_document(document, use_stdin=False, extra_args=extra_args)
         if result and result.stdout:
             log_to_output(f"{document.uri} :\r\n{result.stdout}")
 
             # deep copy here to prevent accidentally updating global settings.
             settings = copy.deepcopy(_get_settings_by_document(document))
             return _parse_output(result.stdout, severity=settings["severity"])
-    except Exception:  # pylint: disable=broad-except
+    except Exception:  # anysqldiag: disable=broad-except
         LSP_SERVER.show_message_log(
             f"Linting failed with error:\r\n{traceback.format_exc()}",
             lsp.MessageType.Error,
@@ -156,69 +148,47 @@ def _linting_helper(document: workspace.Document) -> list[lsp.Diagnostic]:
     return []
 
 
-def _get_severity(
-    symbol: str, code: str, code_type: str, severity: Dict[str, str]
-) -> lsp.DiagnosticSeverity:
-    """Converts severity provided by linter to LSP specific value."""
-    value = (
-        severity.get(symbol, None)
-        or severity.get(code, None)
-        or severity.get(code_type, "Error")
-    )
-    try:
-        return lsp.DiagnosticSeverity[value]
-    except KeyError:
-        pass
-
-    return lsp.DiagnosticSeverity.Error
-
-
-def _build_message_doc_url(code: str) -> str:
-    """Build the URL to the documentation for this diagnostic message."""
-    msg_id, message = code.split(":")
-    category = utils.get_message_category(msg_id)
-    uri = f"{category}/{message}.html" if category else DOCUMENTATION_HOME
-    return f"{DOCUMENTATION_HOME}/{uri}"
-
-
 def _parse_output(
     content: str,
     severity: Dict[str, str],
-) -> Sequence[lsp.Diagnostic]:
+) -> list[lsp.Diagnostic]:
     """Parses linter messages and return LSP diagnostic object for each message."""
     diagnostics = []
     line_offset = 1
+    char_offset = 1
 
     messages: List[Dict[str, Any]] = json.loads(content)
     for data in messages:
+        assert "description" in data, data
+        highlight = data.get("highlight", "")
+        line: int = int(data.get("line", 1)) - line_offset
+        col_start: int = int(data.get("col", 1))
+        col_end: int = col_start + len(highlight)
+
+        char_start: int = col_start - char_offset
+        char_end: int = col_end - char_offset
+
         start = lsp.Position(
-            line=int(data.get("line")) - line_offset,
-            character=int(data.get("column")),
+            line=line,
+            character=char_start,
         )
 
-        if data.get("endLine") is not None:
-            end = lsp.Position(
-                line=int(data.get("endLine")) - line_offset,
-                character=int(data.get("endColumn", 0)),
-            )
-        else:
-            # If there is no endLine we can use `start` for end position.
-            # According to LSP range will include the character at `start`
-            # but will exclude character at `end`. The LSP client in this
-            # case can decide the actual range based on th token this
-            # points to.
-            end = start
+        end = lsp.Position(
+            line=line,
+            character=char_end,
+        )
 
-        code = f"{data.get('message-id')}:{data.get('symbol')}"
-        documentation_url = _build_message_doc_url(code)
+        diag_code = data.get("description", "")
+        diag_message = f"""{diag_code}: [{col_start}:{col_end}] `{highlight}`"""
+        documentation_url = (
+            "https://github.com/tobymao/sqlglot/blob/main/sqlglot/parser.py"
+        )
 
         diagnostic = lsp.Diagnostic(
             range=lsp.Range(start=start, end=end),
-            message=data.get("message"),
-            severity=_get_severity(
-                data.get("symbol"), data.get("message-id"), data.get("type"), severity
-            ),
-            code=f"{data.get('message-id')}:{data.get('symbol')}",
+            message=diag_message,
+            severity=lsp.DiagnosticSeverity.Error,
+            code=diag_code,
             code_description=lsp.CodeDescription(href=documentation_url),
             source=TOOL_DISPLAY,
         )
@@ -270,7 +240,7 @@ class QuickFixSolutions:
     ) -> Optional[
         Callable[[workspace.Document, List[lsp.Diagnostic]], List[lsp.CodeAction]]
     ]:
-        """Given a pylint error code returns a function, if available, that provides
+        """Given a anysqldiag error code returns a function, if available, that provides
         quick fix code actions."""
         return self._solutions.get(code, None)
 
@@ -302,15 +272,7 @@ def code_action(params: lsp.CodeActionParams) -> List[lsp.CodeAction]:
     return code_actions
 
 
-@QUICK_FIXES.quick_fix(
-    codes=[
-        "C0301:line-too-long",
-        "C0303:trailing-whitespace",
-        "C0304:missing-final-newline",
-        "C0305:trailing-newlines",
-        "C0321:multiple-statements",
-    ]
-)
+@QUICK_FIXES.quick_fix(codes=[])
 def fix_format(
     _document: workspace.Document, diagnostics: List[lsp.Diagnostic]
 ) -> List[lsp.CodeAction]:
@@ -324,13 +286,7 @@ def fix_format(
     ]
 
 
-@QUICK_FIXES.quick_fix(
-    codes=[
-        "C0410:multiple-imports",
-        "C0411:wrong-import-order",
-        "C0412:ungrouped-imports",
-    ]
-)
+@QUICK_FIXES.quick_fix(codes=[])
 def organize_imports(
     _document: workspace.Document, diagnostics: List[lsp.Diagnostic]
 ) -> List[lsp.CodeAction]:
@@ -344,52 +300,7 @@ def organize_imports(
     ]
 
 
-REPLACEMENTS: Dict[str, re.Pattern] = {
-    "C0117:unnecessary-negation": [
-        {
-            "pattern": re.compile(r"\snot\s+not"),
-            "repl": r"",
-        }
-    ],
-    "C0121:singleton-comparison": [
-        {
-            "pattern": re.compile(
-                r"(\w+)\s+(?:==\s+True|!=\s+False)|(?:True\s+==|False\s+!=)\s+(\w+)"
-            ),
-            "repl": r"\1\2",
-        },
-        {
-            "pattern": re.compile(
-                r"(\w+)\s+(?:!=\s+True|==\s+False)|(?:True\s+!=|False\s+==)\s+(\w+)"
-            ),
-            "repl": r"not \1\2",
-        },
-    ],
-    "C0123:unidiomatic-typecheck": [
-        {
-            "pattern": re.compile(r"type\((\w+)\)\s+is\s+(\w+)"),
-            "repl": r"isinstance(\1, \2)",
-        }
-    ],
-    "R0205:useless-object-inheritance": [
-        {
-            "pattern": re.compile(r"class (\w+)\(object\):"),
-            "repl": r"class \1:",
-        }
-    ],
-    "R1721:unnecessary-comprehension": [
-        {
-            "pattern": re.compile(r"\{([\w\s,]+) for [\w\s,]+ in ([\w\s,]+)\}"),
-            "repl": r"set(\2)",
-        }
-    ],
-    "E1141:dict-iter-missing-items": [
-        {
-            "pattern": re.compile(r"for\s+(\w+),\s+(\w+)\s+in\s+(\w+)\s*:"),
-            "repl": r"for \1, \2 in \3.items():",
-        }
-    ],
-}
+REPLACEMENTS: Dict[str, re.Pattern] = {}
 
 
 def _get_replacement_edit(diagnostic: lsp.Diagnostic, lines: List[str]) -> lsp.TextEdit:
@@ -507,8 +418,6 @@ def initialize(params: lsp.InitializeParams) -> None:
     paths = "\r\n   ".join(sys.path)
     log_to_output(f"sys.path used to run Server:\r\n   {paths}")
 
-    _log_version_info()
-
 
 @LSP_SERVER.feature(lsp.EXIT)
 def on_exit(_params: Optional[Any] = None) -> None:
@@ -520,49 +429,6 @@ def on_exit(_params: Optional[Any] = None) -> None:
 def on_shutdown(_params: Optional[Any] = None) -> None:
     """Handle clean up on shutdown."""
     jsonrpc.shutdown_json_rpc()
-
-
-def _log_version_info() -> None:
-    for value in WORKSPACE_SETTINGS.values():
-        try:
-            from packaging.version import parse as parse_version
-
-            settings = copy.deepcopy(value)
-            result = _run_tool(["--version"], settings)
-            code_workspace = settings["workspaceFS"]
-            log_to_output(
-                f"Version info for linter running for {code_workspace}:\r\n{result.stdout}"
-            )
-
-            # This is text we get from running `pylint --version`
-            # pylint 2.12.2 <--- This is the version we want.
-            # astroid 2.9.3
-            first_line = result.stdout.splitlines(keepends=False)[0]
-            actual_version = first_line.split(" ")[1]
-
-            version = parse_version(actual_version)
-            min_version = parse_version(MIN_VERSION)
-            VERSION_TABLE[code_workspace] = (
-                version.major,
-                version.minor,
-                version.micro,
-            )
-
-            if version < min_version:
-                log_error(
-                    f"Version of linter running for {code_workspace} is NOT supported:\r\n"
-                    f"SUPPORTED {TOOL_MODULE}>={min_version}\r\n"
-                    f"FOUND {TOOL_MODULE}=={actual_version}\r\n"
-                )
-            else:
-                log_to_output(
-                    f"SUPPORTED {TOOL_MODULE}>={min_version}\r\n"
-                    f"FOUND {TOOL_MODULE}=={actual_version}\r\n"
-                )
-        except:  # pylint: disable=bare-except
-            log_to_output(
-                f"Error while detecting pylint version:\r\n{traceback.format_exc()}"
-            )
 
 
 # *****************************************************
@@ -673,7 +539,7 @@ def get_cwd(settings: Dict[str, Any], document: Optional[workspace.Document]) ->
     return settings["cwd"]
 
 
-# pylint: disable=too-many-branches,too-many-statements
+# anysqldiag: disable=too-many-branches,too-many-statements
 def _run_tool_on_document(
     document: workspace.Document,
     use_stdin: bool = False,
@@ -692,7 +558,7 @@ def _run_tool_on_document(
 
     if not settings["enabled"]:
         log_warning(f"Skipping file [Linting Disabled]: {document.path}")
-        log_warning("See `pylint.enabled` in settings.json to enabling linting.")
+        log_warning("See `anysqldiag.enabled` in settings.json to enabling linting.")
         return None
 
     if str(document.uri).startswith("vscode-notebook-cell"):
@@ -708,7 +574,7 @@ def _run_tool_on_document(
 
     if utils.is_match(settings["ignorePatterns"], document.path):
         log_warning(
-            f"Skipping file due to `pylint.ignorePatterns` match: {document.path}"
+            f"Skipping file due to `anysqldiag.ignorePatterns` match: {document.path}"
         )
         return None
 
@@ -736,13 +602,13 @@ def _run_tool_on_document(
     argv += TOOL_ARGS + settings["args"] + extra_args
 
     # pygls normalizes the path to lowercase on windows, but we need to resolve the
-    # correct capitalization to avoid https://github.com/pylint-dev/pylint/issues/10137
+    # correct capitalization to avoid https://github.com/anysqldiag-dev/anysqldiag/issues/10137
     resolved_path = str(pathlib.Path(document.path).resolve())
 
     if use_stdin:
-        argv += ["--from-stdin", resolved_path]
+        argv += ["--from_stdin"]
     else:
-        argv += [resolved_path]
+        argv += ["--file", resolved_path]
 
     env = None
     if use_path or use_rpc:
@@ -878,7 +744,7 @@ def _run_tool(extra_args: Sequence[str], settings: Dict[str, Any]) -> utils.RunR
     return result
 
 
-def _get_updated_env(settings: Dict[str, Any]) -> str:
+def _get_updated_env(settings: Dict[str, Any]) -> dict[str, str]:
     """Returns the updated environment variables."""
     extra_paths = settings.get("extraPaths", [])
     paths = os.environ.get("PYTHONPATH", "").split(os.pathsep) + extra_paths
@@ -910,7 +776,7 @@ def _to_run_result_with_logging(rpc_result: jsonrpc.RpcRunResult) -> utils.RunRe
 def log_to_output(
     message: str, msg_type: lsp.MessageType = lsp.MessageType.Log
 ) -> None:
-    """Logs messages to Output > Pylint channel only."""
+    """Logs messages to Output > Anysqldiag channel only."""
     LSP_SERVER.show_message_log(message, msg_type)
 
 

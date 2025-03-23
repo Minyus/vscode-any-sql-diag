@@ -33,7 +33,7 @@ update_sys_path(
 update_sys_path(os.getcwd(), os.getenv("LS_IMPORT_STRATEGY", "useBundled"))
 
 
-# pylint: disable=wrong-import-position,import-error
+# anysqldiag: disable=wrong-import-position,import-error
 import lsp_jsonrpc as jsonrpc
 import lsp_utils as utils
 
@@ -49,8 +49,8 @@ while not EXIT_NOW:
         continue
 
     if method == "run":
-        is_exception = False  # pylint: disable=invalid-name
-        # This is needed to preserve sys.path, pylint modifies
+        is_exception = False  # anysqldiag: disable=invalid-name
+        # This is needed to preserve sys.path, anysqldiag modifies
         # sys.path and that might not work for this scenario
         # next time around.
         with utils.substitute_attr(sys, "path", [""] + sys.path[:]):
@@ -62,9 +62,9 @@ while not EXIT_NOW:
                     cwd=msg["cwd"],
                     source=msg["source"] if "source" in msg else None,
                 )
-            except Exception:  # pylint: disable=broad-except
+            except Exception:  # anysqldiag: disable=broad-except
                 result = utils.RunResult("", traceback.format_exc(chain=True))
-                is_exception = True  # pylint: disable=invalid-name
+                is_exception = True  # anysqldiag: disable=invalid-name
 
         response = {"id": msg["id"], "error": result.stderr}
         if is_exception:
