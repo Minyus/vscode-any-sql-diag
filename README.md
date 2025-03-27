@@ -32,6 +32,14 @@ A Visual Studio Code extension to diagnose any SQL dialects supported by [sqlglo
 
 This extension uses [AnySqlDiag](https://github.com/Minyus/any-sql-diag) CLI.
 
+### Requirements
+
+Prepare Python 3.9+ environment and install:
+
+```
+pip install pygls packaging anysqldiag
+```
+
 ### Disabling AnySqlDiag
 
 You can skip diagnosis with AnySqlDiag for specific files or directories by setting the `anysqldiag.ignorePatterns` setting.
